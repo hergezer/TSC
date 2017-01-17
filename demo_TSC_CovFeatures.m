@@ -1,7 +1,7 @@
-% Implementation of feature covariance based time series classification in
+% Implementation of feature covariance based time series classification for
 % Adiac dataset of UCR Repository
 
-% Hamza Ergezer - 2016
+% Hamza Ergezer - 2017
 
 clear all;close all;
 load('.\UCR_Data\Adiac\Adiac_TRAIN')

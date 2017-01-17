@@ -1,4 +1,4 @@
-% clear all;close all;
+clear all;close all;
 load('.\UCR_Data\Adiac\Adiac_TRAIN')
 load('.\UCR_Data\Adiac\Adiac_TEST')
 
@@ -7,13 +7,17 @@ classesAll = Adiac_TRAIN(:,1);
 
 nofRandomSampling = 100;
 nofFeatures = 6;
-ratioBlocks = 4:25;
-overlapRatio = 0.4:0.1:0.9;
-lambdas = [0.05 0.005 0.0005 0.00005];
-classErrors = zeros(length(ratioBlocks),length(overlapRatio),length(lambdas),nofRandomSampling);
-for rb = 1:length(ratioBlocks)
-    for or = 1:length(overlapRatio)
-        for lm = 1:length(lambdas)
+ratioBlocksAll = 4:15;
+overlapRatioAll = 0.4:0.1:0.9;
+lambdasAll = [0.05 0.005 0.0005 0.00005 0.000005 0.0000005];
+classErrorsAll = zeros(length(ratioBlocksAll),length(overlapRatioAll),length(lambdasAll),nofRandomSampling);
+classErrorsAvg = zeros(length(ratioBlocksAll),length(overlapRatioAll),length(lambdasAll));
+for rb = 1:length(ratioBlocksAll)
+    ratioBlocks = ratioBlocksAll(rb);
+    for or = 1:length(overlapRatioAll)
+        overlapRatio = overlapRatioAll(or);
+        for lm = 1:length(lambdasAll)
+            lambdas = lambdasAll(lm);
             for sn = 1:nofRandomSampling
                 [trainDataAll, testDataAll, classesTrain, classesTEST] = generateCrossValidationSets(DataAll,classesAll);
                 dimension = size(trainDataAll,2);
@@ -54,9 +58,7 @@ for rb = 1:length(ratioBlocks)
                         f = [trainData(i,1:end-1); rankTrainData(i,1:end-1); diffTrainData(i,:); cumsumTrainData(i,1:end-1);devFromMeanTrain(i,1:end-1); tNorm]';
                         C_all_Train(:,:,i,j) = logm( cov(f) + lambda*eye(nofFeatures));
                     end
-                end
                 
-                for j=1:nofWords
                     testData = testDataAll(:,bagPoints1(j):bagPoints2(j));
                     tNorm = (2:size(testData,2))/size(testData,2);
                     rankTestData = sort(testData,2);
@@ -92,9 +94,11 @@ for rb = 1:length(ratioBlocks)
                     resultClassesNN(i) = classesTrain(minInd);
                 end
                 
-                ClassErrorNN = 1 - sum(resultClassesNN == classesTEST)/nofTestInstances;
-                classErrors(rb,or,lm,sn) = ClassErrorNN;
+                classErrorNN = 1 - sum(resultClassesNN == classesTEST)/nofTestInstances;
+                classErrorsAll(rb,or,lm,sn) = classErrorNN;
             end
+            classErrorsAvg(rb,or,lm) = mean(classErrorsAll(rb,or,lm,:));
         end
     end
 end
+[rb_i,or_i,lm_i] = ind2sub(size(classErrorsAvg), find(classErrorsAvg==min(min(min(classErrorsAvg)))));

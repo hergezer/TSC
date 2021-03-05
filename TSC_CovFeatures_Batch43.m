@@ -82,7 +82,9 @@ for id = 1:length(datasets)
             C_all_Test(:,:,i,j) = logm( cov(f) + lambda*eye(nofFeatures));            
         end
     end
+
     timeElapsedFeature(id) = toc;
+
     tic;
     ClassErrorNN(id) = calculateClassificationError(C_all_Train,C_all_Test,classesTrain,classesTest);
     timeElapsedNN(id) = toc;    
